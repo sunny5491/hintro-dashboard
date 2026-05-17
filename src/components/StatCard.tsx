@@ -40,7 +40,12 @@ const StatCard = ({
         </div>
       </div>
       <p className="text-2xl font-bold text-[var(--color-text)] tracking-tight">{value}</p>
-      <p className="text-sm text-[var(--color-muted)] mt-1 font-medium">{title}</p>
+      <p className="text-sm text-[var(--color-muted)] mt-1 font-medium">
+        {title}
+        {(value === 0 || value === '—') && (
+          <span className="block text-xs font-normal text-[var(--color-muted)]/70 mt-1">No data yet</span>
+        )}
+      </p>
       {subtitle && (
         <p className="text-xs text-[var(--color-muted)]/70 mt-0.5">{subtitle}</p>
       )}

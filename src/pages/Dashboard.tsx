@@ -4,8 +4,6 @@ import {
   BrainCircuit,
   CalendarCheck,
   CreditCard,
-  BookOpen,
-  FileText,
   CalendarDays,
   TrendingUp,
 } from 'lucide-react';
@@ -16,6 +14,7 @@ import UsageBar from '../components/UsageBar';
 import ErrorBanner from '../components/ErrorBanner';
 import { formatDuration, formatDate } from '../utils/formatters';
 import clsx from 'clsx';
+import { useState, useEffect } from 'react';
 
 const SubscriptionBadge = ({ status }: { status: string }) => {
   const map: Record<string, string> = {
@@ -42,6 +41,15 @@ const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }
 const Dashboard = () => {
   const { profile } = useUser();
   const { dashboardData, callStats, isLoading, error, refetch } = useDashboard();
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    if (!isLive) return;
+    const interval = setInterval(() => {
+      refetch();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isLive, refetch]);
 
   const firstName = profile?.firstName ?? '';
   const hour = new Date().getHours();
@@ -60,10 +68,25 @@ const Dashboard = () => {
             Here's what's happening with your account.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-[var(--color-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] px-3 py-1.5 rounded-lg">
-          <TrendingUp size={13} />
+        <button
+          onClick={() => setIsLive(!isLive)}
+          className={clsx(
+            "flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border",
+            isLive 
+              ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/30" 
+              : "bg-[var(--color-surface)] text-[var(--color-muted)] border-[var(--color-border)] hover:bg-[var(--color-bg)]"
+          )}
+        >
+          {isLive ? (
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-primary)] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-primary)]"></span>
+            </span>
+          ) : (
+            <TrendingUp size={13} />
+          )}
           Live data
-        </div>
+        </button>
       </div>
 
       {error && <ErrorBanner message={error} onRetry={refetch} />}
@@ -144,33 +167,7 @@ const Dashboard = () => {
             />
           </div>
 
-          {/* Quick counts */}
-          {!isLoading && dashboardData && (
-            <div className="grid grid-cols-2 gap-3 mt-6 pt-5 border-t border-[var(--color-border)]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] flex items-center justify-center">
-                  <BookOpen size={16} className="text-[var(--color-muted)]" />
-                </div>
-                <div>
-                  <p className="text-base font-bold text-[var(--color-text)]">
-                    {dashboardData.usage.vocab_terms}
-                  </p>
-                  <p className="text-xs text-[var(--color-muted)]">Vocab Terms</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] flex items-center justify-center">
-                  <FileText size={16} className="text-[var(--color-muted)]" />
-                </div>
-                <div>
-                  <p className="text-base font-bold text-[var(--color-text)]">
-                    {dashboardData.usage.notes}
-                  </p>
-                  <p className="text-xs text-[var(--color-muted)]">Notes</p>
-                </div>
-              </div>
-            </div>
-          )}
+
         </div>
 
         {/* Subscription */}
@@ -200,9 +197,9 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="mt-auto pt-4 border-t border-[var(--color-border)]">
-                <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center">
-                  <CreditCard size={20} className="text-[var(--color-primary)]" />
-                </div>
+                <button className="w-full px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-xs font-semibold rounded-lg hover:bg-[var(--color-bg)] transition-colors">
+                  Manage Plan
+                </button>
               </div>
             </div>
           ) : (
@@ -258,8 +255,12 @@ const Dashboard = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-8 text-center">
-            <p className="text-sm text-[var(--color-muted)]">No recent sessions found.</p>
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-8 flex flex-col items-center justify-center text-center">
+            <div className="w-12 h-12 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] flex items-center justify-center mb-3">
+              <CalendarDays size={20} className="text-[var(--color-muted)]" />
+            </div>
+            <p className="text-sm font-medium text-[var(--color-text)]">No sessions yet</p>
+            <p className="text-xs text-[var(--color-muted)] mt-1">Your recent call sessions will appear here.</p>
           </div>
         )}
       </div>

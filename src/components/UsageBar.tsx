@@ -28,7 +28,13 @@ const UsageBar = ({ label, used, limit, percentage, isLoading = false }: UsageBa
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[var(--color-text)]">{label}</span>
         <span className="text-xs text-[var(--color-muted)]">
-          {used} / {limit} <span className="text-[var(--color-muted)]/60">({pct}%)</span>
+          {used === 0 && percentage === 0 ? (
+            'Nothing used yet'
+          ) : (
+            <>
+              {used} / {limit} <span className="text-[var(--color-muted)]/60">({pct}%)</span>
+            </>
+          )}
         </span>
       </div>
       <div className="h-2 bg-[var(--color-bg)] rounded-full overflow-hidden">
